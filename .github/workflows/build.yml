@@ -28,13 +28,16 @@ jobs:
           pip install buildozer "cython<3.0"
       - name: Build with Buildozer
         run: |
-          buildozer android debug 2>&1 | tee build.log
+          set -o pipefail
+          buildozer android debug 2>&1 | tee build.log || {
+            echo "=== ERROR TAIL ==="
+            grep -n -C 5 -i -E "error|exception|failed|clang|ld:|undefined reference|no such file" build.log | tail -n 60 || tail -n 40 build.log
+            exit 1
+          }
           echo "=== FILES IN BIN ==="
           ls -la bin/ || true
-          find . -name "*.apk" || true
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: ShadowFly-APK
-          path: "**/*.apk"
-          if-no-files-found: warn
+          path: bin/*.apk
