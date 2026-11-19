@@ -9,26 +9,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev libltdl-dev
-        pip install --upgrade pip
-        pip install buildozer "cython>=3.0.0"
+      - name: Cache Buildozer
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildozer
+            .buildozer
+          key: buildozer-${{ runner.os }}-py311-${{ hashFiles('buildozer.spec', 'main.py') }}
+          restore-keys: |
+            buildozer-${{ runner.os }}-py311-
 
-    - name: Build with Buildozer
-      run: |
-        buildozer -v android debug
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev libltdl-dev
+          pip install --upgrade pip
+          pip install buildozer "cython<3.0"
 
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: ShadowFly-APK
-        path: bin/*.apk
+      - name: Build with Buildozer
+        run: |
+          buildozer android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ShadowFly-APK
+          path: bin/*.apk
