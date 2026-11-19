@@ -28,9 +28,13 @@ jobs:
           pip install buildozer "cython<3.0"
       - name: Build with Buildozer
         run: |
-          buildozer android debug 2>&1 | tee build.log || (echo "=== LAST LINES ==="; tail -n 40 build.log; exit 1)
+          buildozer android debug 2>&1 | tee build.log
+          echo "=== FILES IN BIN ==="
+          ls -la bin/ || true
+          find . -name "*.apk" || true
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: ShadowFly-APK
-          path: bin/*.apk
+          path: "**/*.apk"
+          if-no-files-found: warn
