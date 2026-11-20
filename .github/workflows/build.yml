@@ -22,31 +22,33 @@ jobs:
           path: |
             ~/.buildozer
             .buildozer
-          key: buildozer-ubuntu22-py311-v4-${{ hashFiles('buildozer.spec', 'main.py') }}
+          key: buildozer-ubuntu22-py311-v5-${{ hashFiles('buildozer.spec', 'main.py') }}
           restore-keys: |
-            buildozer-ubuntu22-py311-v4-
+            buildozer-ubuntu22-py311-v5-
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y git zip unzip python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev libltdl-dev wget
           pip install --upgrade pip
           pip install buildozer "cython<3.0"
-      - name: Setup Android SDK & Licenses
+      - name: Setup Android SDK & sdkmanager bridge
         run: |
           SDK_DIR="$HOME/.buildozer/android/platform/android-sdk"
-          mkdir -p "$SDK_DIR/cmdline-tools" "$SDK_DIR/licenses"
+          mkdir -p "$SDK_DIR/cmdline-tools" "$SDK_DIR/licenses" "$SDK_DIR/tools/bin"
           if [ ! -f "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" ]; then
             wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/cmdtools.zip
             unzip -q /tmp/cmdtools.zip -d "$SDK_DIR/cmdline-tools/tmp"
             mv "$SDK_DIR/cmdline-tools/tmp/cmdline-tools" "$SDK_DIR/cmdline-tools/latest"
             rm -rf "$SDK_DIR/cmdline-tools/tmp" /tmp/cmdtools.zip
           fi
+          ln -sf "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" "$SDK_DIR/tools/bin/sdkmanager"
+          ln -sf "$SDK_DIR/cmdline-tools/latest/bin/avdmanager" "$SDK_DIR/tools/bin/avdmanager" 2>/dev/null || true
           yes | "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK_DIR" --licenses >/dev/null 2>&1 || true
           yes | "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK_DIR" "platform-tools" "platforms;android-33" "build-tools;33.0.2" >/dev/null 2>&1 || true
       - name: Build with Buildozer
         run: |
           set -o pipefail
-          yes | buildozer android debug 2>&1 | tee build.log || {
+          (yes || true) | buildozer android debug 2>&1 | tee build.log || {
             echo "=== LAST 120 CLEAN LINES ==="
             sed -r 's/\x1B\[[0-9;]*[mK]//g' build.log | tail -n 120
             exit 1
