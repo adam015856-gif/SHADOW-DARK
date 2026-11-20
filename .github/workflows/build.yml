@@ -35,8 +35,8 @@ jobs:
         run: |
           set -o pipefail
           buildozer android debug 2>&1 | tee build.log || {
-            echo "=== ACTUAL ERROR ==="
-            grep -n -B 35 -A 2 "Command failed:" build.log | tail -n 45
+            echo "=== LAST 60 LINES ==="
+            tail -n 60 build.log
             exit 1
           }
       - name: Upload APK
