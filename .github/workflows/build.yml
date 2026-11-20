@@ -35,8 +35,8 @@ jobs:
         run: |
           set -o pipefail
           buildozer android debug 2>&1 | tee build.log || {
-            echo "=== LAST 60 LINES ==="
-            tail -n 60 build.log
+            echo "=== REAL ERRORS ONLY ==="
+            grep -v "performance hint:" build.log | grep -v "Possible solutions:" | grep -v "1. Declare" | grep -v "2. Use an" | grep -i -E "error:|fatal error|traceback|command failed|no such file|undefined reference" | tail -n 50 || tail -n 30 build.log
             exit 1
           }
       - name: Upload APK
