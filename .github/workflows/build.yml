@@ -19,9 +19,9 @@ jobs:
           path: |
             ~/.buildozer
             .buildozer
-          key: buildozer-${{ runner.os }}-py3.10-v5-${{ hashFiles('buildozer.spec') }}
+          key: buildozer-${{ runner.os }}-py3.10-v6-${{ hashFiles('buildozer.spec') }}
           restore-keys: |
-            buildozer-${{ runner.os }}-py3.10-v5-
+            buildozer-${{ runner.os }}-py3.10-v6-
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -45,14 +45,11 @@ jobs:
       - name: Build debug APK
         env:
           JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
-          ANDROID_NDK: /home/runner/.buildozer/android/platform/android-ndk-r25b
-          ANDROID_NDK_HOME: /home/runner/.buildozer/android/platform/android-ndk-r25b
-          ANDROID_NDK_ROOT: /home/runner/.buildozer/android/platform/android-ndk-r25b
         run: |
           set -o pipefail
           buildozer -v android debug 2>&1 | tee build.log || {
-            echo "=== ACTUAL ERRORS IN BUILD.LOG ==="
-            grep -iE "error:|failed|no matching distribution|could not find|exception:" build.log | tail -n 30
+            echo "=== TAIL OF BUILD.LOG ==="
+            tail -n 80 build.log
             exit 1
           }
 
