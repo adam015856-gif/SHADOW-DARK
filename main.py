@@ -1,22 +1,17 @@
-from pathlib import Path
-import zipfile, textwrap
-
-base = Path("/mnt/data/SHADOW_DARK_APP")
-(base / ".github" / "workflows").mkdir(parents=True, exist_ok=True)
-
-main_py = r'''import json
+import json
 import os
 
 from kivy.app import App
 from kivy.lang import Builder
+from kivy.metrics import dp
 from kivy.properties import ListProperty
-from kivy.uix.popup import Popup
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
 from kivy.uix.label import Label
+from kivy.uix.popup import Popup
 from kivy.utils import platform
 
 KV = r"""
-#:import dp kivy.metrics.dp
-
 <ShadowButton@Button>:
     background_normal: ""
     background_color: (0.30, 0.08, 0.52, 1)
@@ -88,6 +83,7 @@ BoxLayout:
         size_hint_y: None
         height: dp(42)
 """
+
 
 class ShadowDarkApp(App):
     games = ListProperty([])
@@ -217,91 +213,3 @@ class ShadowDarkApp(App):
 
 if __name__ == "__main__":
     ShadowDarkApp().run()
-'''
-spec = r'''[app]
-title = SHADOW DARK
-package.name = shadowdark
-package.domain = com.shadowdark
-source.dir = .
-source.include_exts = py,kv,png,jpg,json
-version = 1.0
-requirements = python3,kivy,pyjnius
-orientation = portrait
-fullscreen = 0
-android.api = 35
-android.minapi = 23
-android.ndk = 25b
-android.archs = arm64-v8a
-android.accept_sdk_license = True
-android.permissions = QUERY_ALL_PACKAGES
-
-[buildozer]
-log_level = 2
-warn_on_root = 1
-'''
-workflow = r'''name: Build SHADOW DARK APK
-
-on:
-  workflow_dispatch:
-  push:
-    branches: [main]
-
-jobs:
-  build:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Install system packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y git zip unzip openjdk-17-jdk \
-            autoconf libtool pkg-config zlib1g-dev libffi-dev \
-            libssl-dev build-essential cmake
-
-      - name: Install Buildozer
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install buildozer cython==0.29.33
-
-      - name: Build debug APK
-        run: buildozer -v android debug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: SHADOW-DARK-APK
-          path: bin/*.apk
-          if-no-files-found: error
-'''
-readme = """# SHADOW DARK
-
-Python/Kivy starter app for Android. It saves package names, then launches installed
-games from inside the app.
-
-Important: ordinary third-party apps cannot silently hide other apps from Samsung
-One UI's app drawer. Use Samsung Home screen settings > Hide apps on Home and Apps
-screens to hide selected apps from the launcher. This does not uninstall them.
-
-## GitHub build
-Upload the whole project to the root of your repository, preserving the
-`.github/workflows/build.yml` path. Open Actions and run "Build SHADOW DARK APK".
-Download the `SHADOW-DARK-APK` artifact from the successful run.
-"""
-(base / "main.py").write_text(main_py, encoding="utf-8")
-(base / "buildozer.spec").write_text(spec + "\n", encoding="utf-8")
-(base / ".github" / "workflows" / "build.yml").write_text(workflow + "\n", encoding="utf-8")
-(base / "README.md").write_text(readme, encoding="utf-8")
-
-zip_path = Path("/mnt/data/SHADOW_DARK_APP_CODE.zip")
-with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
-    for file_path in base.rglob("*"):
-        if file_path.is_file():
-            archive.write(file_path, file_path.relative_to(base))
-print(f"Created {zip_path}")
