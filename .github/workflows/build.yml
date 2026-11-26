@@ -19,9 +19,9 @@ jobs:
           path: |
             ~/.buildozer
             .buildozer
-          key: buildozer-${{ runner.os }}-py3.10-v2-${{ hashFiles('buildozer.spec') }}
+          key: buildozer-${{ runner.os }}-py3.10-v3-${{ hashFiles('buildozer.spec') }}
           restore-keys: |
-            buildozer-${{ runner.os }}-py3.10-v2-
+            buildozer-${{ runner.os }}-py3.10-v3-
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -43,7 +43,9 @@ jobs:
           python -m pip install --upgrade buildozer cython==0.29.36
 
       - name: Build debug APK
-        run: yes | buildozer -v android debug
+        env:
+          JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+        run: buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
