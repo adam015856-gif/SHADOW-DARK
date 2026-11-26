@@ -19,9 +19,9 @@ jobs:
           path: |
             ~/.buildozer
             .buildozer
-          key: buildozer-${{ runner.os }}-py3.10-v7-${{ hashFiles('buildozer.spec') }}
+          key: buildozer-${{ runner.os }}-py3.10-v8-${{ hashFiles('buildozer.spec') }}
           restore-keys: |
-            buildozer-${{ runner.os }}-py3.10-v7-
+            buildozer-${{ runner.os }}-py3.10-v8-
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -40,7 +40,7 @@ jobs:
       - name: Install Buildozer
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          python -m pip install --upgrade buildozer cython
+          python -m pip install --upgrade buildozer "cython<3.0"
 
       - name: Build debug APK
         env:
@@ -48,8 +48,8 @@ jobs:
         run: |
           set -o pipefail
           buildozer -v android debug 2>&1 | tee build.log || {
-            echo "=== LINES RIGHT BEFORE FAILURE ==="
-            grep -B 120 -m 1 "^# Command failed:" build.log || tail -n 120 build.log
+            echo "=== TRUE ERROR BEFORE ENVIRONMENT ==="
+            grep -B 60 -m 1 "^# ENVIRONMENT:" build.log || tail -n 120 build.log
             exit 1
           }
 
