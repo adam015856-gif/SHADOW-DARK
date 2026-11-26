@@ -19,9 +19,9 @@ jobs:
           path: |
             ~/.buildozer
             .buildozer
-          key: buildozer-${{ runner.os }}-py3.10-v8-${{ hashFiles('buildozer.spec') }}
+          key: buildozer-${{ runner.os }}-py3.10-v9-${{ hashFiles('buildozer.spec') }}
           restore-keys: |
-            buildozer-${{ runner.os }}-py3.10-v8-
+            buildozer-${{ runner.os }}-py3.10-v9-
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -48,8 +48,8 @@ jobs:
         run: |
           set -o pipefail
           buildozer -v android debug 2>&1 | tee build.log || {
-            echo "=== TRUE ERROR BEFORE ENVIRONMENT ==="
-            grep -B 60 -m 1 "^# ENVIRONMENT:" build.log || tail -n 120 build.log
+            echo "=== REAL BUILD OUTPUT BEFORE FAILURE ==="
+            grep -B 200 -m 1 "^# Command failed:" build.log | grep -v "^#     " | tail -n 80
             exit 1
           }
 
