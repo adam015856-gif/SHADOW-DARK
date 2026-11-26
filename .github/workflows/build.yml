@@ -13,17 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache Buildozer & Android SDK
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.buildozer
-            .buildozer
-          key: buildozer-${{ runner.os }}-py3.10-v9-${{ hashFiles('buildozer.spec') }}
-          restore-keys: |
-            buildozer-${{ runner.os }}-py3.10-v9-
-
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
@@ -35,7 +25,8 @@ jobs:
             git zip unzip openjdk-17-jdk \
             autoconf automake libtool pkg-config \
             zlib1g-dev libffi-dev libssl-dev \
-            build-essential cmake libgl1-mesa-dev libgles2-mesa-dev
+            build-essential cmake libgl1-mesa-dev libgles2-mesa-dev \
+            libncurses5-dev libsqlite3-dev libreadline-dev
 
       - name: Install Buildozer
         run: |
@@ -46,10 +37,10 @@ jobs:
         env:
           JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
         run: |
-          set -o pipefail
-          buildozer -v android debug 2>&1 | tee build.log || {
-            echo "=== REAL BUILD OUTPUT BEFORE FAILURE ==="
-            grep -B 200 -m 1 "^# Command failed:" build.log | grep -v "^#     " | tail -n 80
+          rm -rf .buildozer
+          buildozer -v android debug || {
+            echo "=== LOG FILES INSIDE .BUILDOZER ==="
+            find .buildozer -type f \( -name "*.log" -o -name "*.txt" \) -exec tail -n 50 {} + 2>/dev/null | tail -n 100
             exit 1
           }
 
