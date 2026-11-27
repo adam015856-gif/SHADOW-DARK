@@ -14,7 +14,3 @@ android.ndk = 27c
 android.archs = arm64-v8a
 android.accept_sdk_license = True
 android.permissions = QUERY_ALL_PACKAGES
-
-[buildozer]
-log_level = 2
-warn_on_root = 1
