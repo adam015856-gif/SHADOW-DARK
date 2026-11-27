@@ -33,7 +33,7 @@ jobs:
       - name: Install Buildozer
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          python -m pip install --upgrade buildozer "cython<3.0"
+          python -m pip install --upgrade buildozer "cython==0.29.36"
 
       - name: Prepare NDK from Runner SDK
         run: |
@@ -49,11 +49,15 @@ jobs:
           rm -rf .buildozer
           unset LD_LIBRARY_PATH ANDROID_NDK ANDROID_NDK_HOME ANDROID_NDK_ROOT
           set -o pipefail
-          buildozer -v android debug 2>&1 | tee build.log || {
-            echo "=== REAL ERROR ABOVE COMMAND FAILED ==="
-            grep -B 35 "Command failed:" build.log | head -n 35
-            exit 1
-          }
+          buildozer -v android debug 2>&1 | tee build.log
+
+      - name: Upload build.log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: SHADOW-DARK-BUILD-LOG
+          path: build.log
+          if-no-files-found: ignore
 
       - name: Upload APK
         if: success()
