@@ -44,7 +44,6 @@ class ShadowDarkApp(App):
 
         root = BoxLayout(orientation="vertical", padding=dp(12), spacing=dp(10))
 
-        # Top header
         header = DarkCard(
             orientation="horizontal",
             size_hint_y=None,
@@ -76,7 +75,6 @@ class ShadowDarkApp(App):
         header.add_widget(self.lock_btn)
         root.add_widget(header)
 
-        # Tabs
         tabs = BoxLayout(size_hint_y=None, height=dp(44), spacing=dp(8))
         self.btn_visible = Button(
             text="Games List",
@@ -105,7 +103,6 @@ class ShadowDarkApp(App):
         tabs.add_widget(self.btn_set_pin)
         root.add_widget(tabs)
 
-        # Status bar
         self.status_lbl = Label(
             text="",
             size_hint_y=None,
@@ -115,7 +112,6 @@ class ShadowDarkApp(App):
         )
         root.add_widget(self.status_lbl)
 
-        # Scrollable list
         scroll = ScrollView(do_scroll_x=False)
         self.list_container = BoxLayout(
             orientation="vertical",
@@ -168,7 +164,6 @@ class ShadowDarkApp(App):
 
                 PythonActivity = autoclass("org.kivy.android.PythonActivity")
                 Intent = autoclass("android.content.Intent")
-                PackageManager = autoclass("android.content.pm.PackageManager")
 
                 activity = PythonActivity.mActivity
                 pm = activity.getPackageManager()
@@ -195,7 +190,6 @@ class ShadowDarkApp(App):
                 self.status_lbl.text = f"Error reading apps: {e}"
                 return []
         else:
-            # Sample data for desktop testing
             return [
                 {"name": "Shadow Strike Arena", "package": "com.shadow.strike"},
                 {"name": "Dark Rift Legends", "package": "com.dark.rift"},
