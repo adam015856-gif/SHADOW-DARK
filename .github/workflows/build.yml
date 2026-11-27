@@ -48,8 +48,15 @@ jobs:
           unset LD_LIBRARY_PATH
           set -o pipefail
           buildozer -v android debug 2>&1 | tee build.log || {
-            echo "=== 40 LINES BEFORE FIRST COMMAND FAILED ==="
-            awk '/^# Command failed:/{exit} {lines[NR]=$0} END{start=(NR>40?NR-40:1); for(i=start;i<=NR;i++) print lines[i]}' build.log
+            echo "=== TRUE P4A ERROR LINES ==="
+            awk '
+              /^# ENVIRONMENT:/ { stop=1 }
+              !stop { buf[++n]=$0 }
+              END {
+                start = (n > 50 ? n - 50 : 1)
+                for (i = start; i <= n; i++) print buf[i]
+              }
+            ' build.log
             exit 1
           }
 
