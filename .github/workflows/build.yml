@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
@@ -47,8 +47,10 @@ jobs:
           rm -rf .buildozer
           set -o pipefail
           buildozer -v android debug 2>&1 | tee build.log || {
-            echo "=== LAST 60 LINES BEFORE # ENVIRONMENT: IN BUILD.LOG ==="
-            awk '/^# ENVIRONMENT:/{exit} {lines[NR]=$0} END{start=(NR>60?NR-60:1); for(i=start;i<=NR;i++) print lines[i]}' build.log
+            echo "=== FILTERED ERROR LINES ==="
+            grep -v "^#     " build.log | grep -E -i "(error:|exception:|traceback|command failed|no such file|permission denied|undefined reference|ninja:|cmake error|configure: error)" | tail -n 50 || true
+            echo "=== LAST 40 NON-ENV LINES ==="
+            grep -v "^#     " build.log | tail -n 40
             exit 1
           }
 
