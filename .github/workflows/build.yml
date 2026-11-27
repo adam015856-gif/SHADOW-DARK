@@ -51,18 +51,20 @@ jobs:
           set -o pipefail
           buildozer -v android debug 2>&1 | tee build.log || {
             python - <<'EOF'
-with open("build.log", "r", errors="replace") as f:
-    lines = [line.rstrip("\r\n") for line in f]
+          with open("build.log", "r", errors="replace") as f:
+              lines = [x.rstrip("\r\n") for x in f]
 
-idx = next((i for i, l in enumerate(lines) if "Command failed:" in l), None)
-if idx is None:
-    idx = len(lines)
+          cut = len(lines)
+          for pos, text in enumerate(lines):
+              if "Command failed" in text:
+                  cut = pos
+                  break
 
-before = [l for l in lines[:idx] if not l.startswith("#     ")]
-print("=== EXACT ERROR LINES BEFORE COMMAND FAILED ===")
-for l in before[-35:]:
-    print(l)
-EOF
+          clean = [x for x in lines[:cut] if not x.startswith("#     ")]
+          print("=== EXACT ERROR LINES BEFORE COMMAND FAILED ===")
+          for x in clean[-35:]:
+              print(x)
+          EOF
             exit 1
           }
 
