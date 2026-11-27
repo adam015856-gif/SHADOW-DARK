@@ -1,4 +1,8 @@
 [app]
+p4a.branch = develop
+android.ndk = 27c
+android.api = 33
+android.minapi = 23
 title = SHADOW DARK
 package.name = shadowdark
 package.domain = com.shadowdark
