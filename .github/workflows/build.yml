@@ -33,6 +33,13 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           python -m pip install --upgrade buildozer "cython<3.0"
 
+      - name: Prepare NDK from Runner SDK
+        run: |
+          mkdir -p ~/.buildozer/android/platform
+          if [ -d "/usr/local/lib/android/sdk/ndk/27.3.13750724" ] && [ ! -e ~/.buildozer/android/platform/android-ndk-r27c ]; then
+            ln -s /usr/local/lib/android/sdk/ndk/27.3.13750724 ~/.buildozer/android/platform/android-ndk-r27c
+          fi
+
       - name: Build debug APK
         env:
           JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
