@@ -14,8 +14,6 @@ jobs:
 
     env:
       JAVA_HOME: /usr/lib/jvm/temurin-17-jdk-amd64
-      ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/27.3.13750724
-      ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk/27.3.13750724
 
     steps:
       - name: Checkout repository
@@ -39,9 +37,9 @@ jobs:
           path: |
             ~/.buildozer
             ~/.gradle
-          key: buildozer-java17-ndk27-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+          key: buildozer-java17-ndk28c-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
           restore-keys: |
-            buildozer-java17-ndk27-${{ runner.os }}-
+            buildozer-java17-ndk28c-${{ runner.os }}-
 
       - name: Install Buildozer and Cython
         run: |
