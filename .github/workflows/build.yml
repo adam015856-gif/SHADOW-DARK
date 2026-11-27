@@ -1,48 +1,4 @@
-name: Build SHADOW DARK APK
-
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Install system packages
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y --fix-missing \
-            git zip unzip openjdk-17-jdk ccache \
-            autoconf automake libtool libltdl-dev pkg-config \
-            zlib1g-dev libffi-dev libssl-dev \
-            build-essential cmake ninja-build \
-            libgl1-mesa-dev libgles2-mesa-dev \
-            libncurses5-dev libsqlite3-dev libreadline-dev \
-            libbz2-dev liblzma-dev
-
-      - name: Install Buildozer
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install --upgrade buildozer "cython<3.0"
-
-      - name: Prepare NDK from Runner SDK
-        run: |
-          mkdir -p ~/.buildozer/android/platform
-          if [ -d "/usr/local/lib/android/sdk/ndk/27.3.13750724" ] && [ ! -e ~/.buildozer/android/platform/android-ndk-r27c ]; then
-            ln -s /usr/local/lib/android/sdk/ndk/27.3.13750724 ~/.buildozer/android/platform/android-ndk-r27c
-          fi
-
-      - name: Build debug APK
+- name: Build debug APK
         env:
           JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
         run: |
@@ -51,35 +7,35 @@ jobs:
           set -o pipefail
           buildozer -v android debug 2>&1 | tee build.log || {
             python - <<'EOF'
-          with open("build.log", "r", errors="replace") as f:
-              lines = [x.rstrip("\r\n") for x in f]
+with open("build.log", "r", errors="replace") as f:
+    lines = [x.rstrip("\r\n") for x in f]
 
-          cut = len(lines)
-          for pos, text in enumerate(lines):
-              if "Command failed" in text:
-                  cut = pos
-                  break
+keywords = (
+    "error:",
+    "error ",
+    "traceback",
+    "exception",
+    "no module named",
+    "could not find",
+    "failed to",
+    "command failed",
+)
 
-          clean = [x for x in lines[:cut] if not x.startswith("#     ")]
-          print("=== EXACT ERROR LINES BEFORE COMMAND FAILED ===")
-          for x in clean[-35:]:
-              print(x)
-          EOF
+hits = []
+for i, line in enumerate(lines):
+    low = line.lower()
+    if line.startswith("#     "):
+        continue
+    if any(k in low for k in keywords) and "error code:" not in low:
+        start = max(0, i - 3)
+        end = min(len(lines), i + 4)
+        for j in range(start, end):
+            if not lines[j].startswith("#     ") and lines[j] not in hits:
+                hits.append(lines[j])
+
+print("=== REAL BUILD ERRORS ===")
+for line in hits[-60:]:
+    print(line)
+EOF
             exit 1
           }
-
-      - name: Upload build.log on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: SHADOW-DARK-BUILD-LOG
-          path: build.log
-          if-no-files-found: ignore
-
-      - name: Upload APK
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: SHADOW-DARK-APK
-          path: bin/*.apk
-          if-no-files-found: error
