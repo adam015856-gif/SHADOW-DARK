@@ -1,76 +1,59 @@
-Run buildozer android debug
-Cloning into 'python-for-android'...
-Traceback (most recent call last):
-  File "/opt/hostedtoolcache/Python/3.10.22/x64/bin/buildozer", line 6, in <module>
-# Ensure build layout
-    sys.exit(main())
-  File "/opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/site-packages/buildozer/scripts/client.py", line 16, in main
-    Buildozer().run_command(sys.argv[1:])
-  File "/opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/site-packages/buildozer/__init__.py", line 684, in run_command
-    self.target.run_commands(args)
-  File "/opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/site-packages/buildozer/target.py", line 96, in run_commands
-    func(args)
-  File "/opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/site-packages/buildozer/targets/android.py", line 1015, in cmd_debug
-    super().cmd_debug(*args)
-  File "/opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/site-packages/buildozer/target.py", line 106, in cmd_debug
-    self.buildozer.prepare_for_build()
-  File "/opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/site-packages/buildozer/__init__.py", line 91, in prepare_for_build
-    self.target.install_platform()
-  File "/opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/site-packages/buildozer/targets/android.py", line 655, in install_platform
-    self._install_android_ndk()
-  File "/opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/site-packages/buildozer/targets/android.py", line 473, in _install_android_ndk
-    buildops.download(url,
-  File "/opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/site-packages/buildozer/buildops.py", line 416, in download
-    with urlopen(request) as response:
-  File "/opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/urllib/request.py", line 216, in urlopen
-    return opener.open(url, data, timeout)
-  File "/opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/urllib/request.py", line 525, in open
-    response = meth(req, response)
-  File "/opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/urllib/request.py", line 634, in http_response
-    response = self.parent.error(
-  File "/opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/urllib/request.py", line 563, in error
-    return self._call_chain(*args)
-  File "/opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/urllib/request.py", line 496, in _call_chain
-    result = func(*args)
-  File "/opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/urllib/request.py", line 643, in http_error_default
-    raise HTTPError(req.full_url, code, msg, hdrs, fp)
-urllib.error.HTTPError: HTTP Error 404: Not Found
-# Create directory /home/runner/.buildozer
-# Create directory /home/runner/.buildozer/cache
-# Create directory /home/runner/work/SHADOW-DARK/SHADOW-DARK/.buildozer
-# Create directory /home/runner/work/SHADOW-DARK/SHADOW-DARK/bin
-# Create directory /home/runner/work/SHADOW-DARK/SHADOW-DARK/.buildozer/applibs
-# Create directory /home/runner/.buildozer/android/platform/android/platform
-# Create directory /home/runner/work/SHADOW-DARK/SHADOW-DARK/.buildozer/android/platform
-# Create directory /home/runner/work/SHADOW-DARK/SHADOW-DARK/.buildozer/android/app
-# Check configuration tokens
-# Preparing build
-# Check requirements for android
-# Search for Git (git)
-#  -> found at /usr/bin/git
-# Search for Cython (cython)
-#  -> found at /opt/hostedtoolcache/Python/3.10.22/x64/bin/cython
-# Search for Java compiler (javac)
-#  -> found at /usr/lib/jvm/temurin-17-jdk-amd64/bin/javac
-# Search for Java keytool (keytool)
-#  -> found at /usr/lib/jvm/temurin-17-jdk-amd64/bin/keytool
-# Install platform
-# Run 'git clone -b master --single-branch https://github.com/kivy/python-for-android.git python-for-android' ...
-# Cwd /home/runner/work/SHADOW-DARK/SHADOW-DARK/.buildozer/android/platform
-# Run '/opt/hostedtoolcache/Python/3.10.22/x64/bin/python -m pip install -q --user appdirs colorama>=0.3.3 jinja2 sh>=2, <3.0; sys_platform!="win32" meson ninja build toml packaging setuptools wheel~=0.43.0' ...
-# Cwd None
-# Android ANT is missing, downloading
-# Downloading https://archive.apache.org/dist/ant/binaries/apache-ant-1.9.4-bin.tar.gz
-# Extracting apache-ant-1.9.4-bin.tar.gz to /home/runner/.buildozer/android/platform/apache-ant-1.9.4
-# Apache ANT installation done.
-# Android SDK is missing, downloading
-# Downloading https://dl.google.com/android/repository/commandlinetools-linux-6514223_latest.zip
-# Unpacking Android SDK
-# Extracting commandlinetools-linux-6514223_latest.zip to /home/runner/.buildozer/android/platform/android-sdk
-# Run 'unzip -q /home/runner/.buildozer/android/platform/android-sdk/commandlinetools-linux-6514223_latest.zip' ...
-# Cwd /home/runner/.buildozer/android/platform/android-sdk
-# Android SDK tools base installation done.
-# Recommended android's NDK version by p4a is: 28c
-# Android NDK is missing, downloading
-# Downloading https://dl.google.com/android/repository/android-ndk-r27.3.13750724-linux.zip
-Error: Process completed with exit code 1
+name: Build Kivy APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      JAVA_HOME: /usr/lib/jvm/temurin-17-jdk-amd64
+      ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/27.3.13750724
+      ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk/27.3.13750724
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install system dependencies for Buildozer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config \
+            zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev lld
+
+      - name: Cache Buildozer and Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildozer
+            ~/.gradle
+          key: buildozer-java17-ndk27-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            buildozer-java17-ndk27-${{ runner.os }}-
+
+      - name: Install Buildozer and Cython
+        run: |
+          python -m pip install --upgrade pip wheel
+          pip install --break-system-packages "setuptools<70" "cython<3.0" buildozer
+
+      - name: Build Android APK
+        run: |
+          buildozer android debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shadow-dark-apk
+          path: bin/*.apk
