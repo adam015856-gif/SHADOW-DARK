@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
@@ -22,10 +22,11 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y --fix-missing \
-            git zip unzip openjdk-17-jdk \
-            autoconf automake libtool pkg-config \
+            git zip unzip openjdk-17-jdk ccache \
+            autoconf automake libtool libltdl-dev pkg-config \
             zlib1g-dev libffi-dev libssl-dev \
-            build-essential cmake libgl1-mesa-dev libgles2-mesa-dev \
+            build-essential cmake ninja-build \
+            libgl1-mesa-dev libgles2-mesa-dev \
             libncurses5-dev libsqlite3-dev libreadline-dev
 
       - name: Install Buildozer
@@ -43,24 +44,23 @@ jobs:
       - name: Build debug APK
         env:
           JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+          ANDROIDNDK: /home/runner/.buildozer/android/platform/android-ndk-r27c
         run: |
           rm -rf .buildozer
-          unset LD_LIBRARY_PATH
+          unset LD_LIBRARY_PATH ANDROID_NDK ANDROID_NDK_HOME ANDROID_NDK_ROOT
           set -o pipefail
-          buildozer -v android debug 2>&1 | tee build.log || {
-            echo "=== TRUE P4A ERROR LINES ==="
-            awk '
-              /^# ENVIRONMENT:/ { stop=1 }
-              !stop { buf[++n]=$0 }
-              END {
-                start = (n > 50 ? n - 50 : 1)
-                for (i = start; i <= n; i++) print buf[i]
-              }
-            ' build.log
-            exit 1
-          }
+          buildozer -v android debug 2>&1 | tee build.log
+
+      - name: Upload build.log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: SHADOW-DARK-BUILD-LOG
+          path: build.log
+          if-no-files-found: ignore
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: SHADOW-DARK-APK
