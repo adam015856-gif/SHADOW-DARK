@@ -1,52 +1,20 @@
-name: Build SHADOW DARK APK
+[app]
+title = SHADOW DARK
+package.name = shadowdark
+package.domain = com.shadowdark
+source.dir = .
+source.include_exts = py,kv,png,jpg,json
+version = 1.0
+requirements = python3,kivy
+orientation = portrait
+fullscreen = 0
+android.api = 33
+android.minapi = 23
+android.ndk = 27.3.13750724
+android.archs = arm64-v8a
+android.accept_sdk_license = True
+android.permissions = QUERY_ALL_PACKAGES
 
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Install system packages
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y --fix-missing \
-            git zip unzip openjdk-17-jdk \
-            autoconf automake libtool pkg-config \
-            zlib1g-dev libffi-dev libssl-dev \
-            build-essential cmake libgl1-mesa-dev libgles2-mesa-dev \
-            libncurses5-dev libsqlite3-dev libreadline-dev
-
-      - name: Install Buildozer
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install --upgrade buildozer "cython<3.0"
-
-      - name: Build debug APK
-        env:
-          JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
-        run: |
-          rm -rf .buildozer
-          buildozer -v android debug || {
-            echo "=== LOG FILES INSIDE .BUILDOZER ==="
-            find .buildozer -type f \( -name "*.log" -o -name "*.txt" \) -exec tail -n 50 {} + 2>/dev/null | tail -n 100
-            exit 1
-          }
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: SHADOW-DARK-APK
-          path: bin/*.apk
-          if-no-files-found: error
+[buildozer]
+log_level = 2
+warn_on_root = 1
