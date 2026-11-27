@@ -47,8 +47,8 @@ jobs:
           rm -rf .buildozer
           set -o pipefail
           buildozer -v android debug 2>&1 | tee build.log || {
-            echo "=== ACTUAL P4A FAILURE OUTPUT ==="
-            grep -v "^# " build.log | tail -n 80
+            echo "=== EXACT LINES BEFORE # ENVIRONMENT: ==="
+            sed -n '/^# ENVIRONMENT:/q;p' build.log | tail -n 50
             exit 1
           }
 
