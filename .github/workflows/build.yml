@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
@@ -45,10 +45,11 @@ jobs:
           JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
         run: |
           rm -rf .buildozer
+          unset LD_LIBRARY_PATH
           set -o pipefail
           buildozer -v android debug 2>&1 | tee build.log || {
-            echo "=== EXACT LINES BEFORE # ENVIRONMENT: ==="
-            sed -n '/^# ENVIRONMENT:/q;p' build.log | tail -n 50
+            echo "=== 40 LINES BEFORE FIRST COMMAND FAILED ==="
+            awk '/^# Command failed:/{exit} {lines[NR]=$0} END{start=(NR>40?NR-40:1); for(i=start;i<=NR;i++) print lines[i]}' build.log
             exit 1
           }
 
